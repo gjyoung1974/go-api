@@ -8,7 +8,6 @@ import (
 	"rest-api/model"
 )
 
-
 var people []model.Person
 
 func GetPersonEndpoint(w http.ResponseWriter, r *http.Request) {
@@ -21,16 +20,21 @@ func GetPersonEndpoint(w http.ResponseWriter, r *http.Request) {
 	}
 	json.NewEncoder(w).Encode(&model.Person{})
 }
+
 func GetPeopleEndpoint(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(people)
 }
+
 func CreatePersonEndpoint(w http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
+	db := model.DBMigrate()
+	defer db.Close()
+
 	var person model.Person
 	_ = json.NewDecoder(r.Body).Decode(&person)
-	person.Firstname = params["Firstname"]
 	people = append(people, person)
-	json.NewEncoder(w).Encode(people)
+	//json.NewEncoder(w).Encode(people)
+	db.Create(&person)
+
 }
 func DeletePersonEndpoint(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
@@ -45,11 +49,7 @@ func DeletePersonEndpoint(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 
-	//db := model.DBMigrate()
 	router := mux.NewRouter()
-
-	people = append(people, model.Person{Firstname: "John", Lastname: "Doe", City: "City X", State: "State X"})
-	people = append(people, model.Person{Firstname: "Gordon", Lastname: "Young", City: "Tempe", State: "AZ"})
 
 	router.HandleFunc("/people", GetPeopleEndpoint).Methods("GET")
 	router.HandleFunc("/people/{id}", GetPersonEndpoint).Methods("GET")
@@ -57,3 +57,5 @@ func main() {
 	router.HandleFunc("/people/{id}", DeletePersonEndpoint).Methods("DELETE")
 	log.Fatal(http.ListenAndServe(":8000", router))
 }
+
+// curl --header "Content-Type: application/json" --request POST --data '{Firstname: "John", Lastname: "Doe", City: "City X", State: "State X"}' http://localhost:8000/people/1

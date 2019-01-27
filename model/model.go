@@ -31,6 +31,5 @@ func (p *Person) Enable() {
 func DBMigrate() *gorm.DB {
 	db, _ := gorm.Open("sqlite3", ".//people.db")
 	db.AutoMigrate(&Person{})
-	defer db.Close()
 	return db
 }
