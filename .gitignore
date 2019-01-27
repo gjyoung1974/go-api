@@ -1,3 +1,7 @@
+/.idea
+./idea
+.idea
+
 # Terraform files
 # Local .terraform directories
 terraform-provider*
